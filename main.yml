@@ -23,6 +23,14 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9000
+      - name: mysql
+        image: k8s/mysql
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: root
 ---
 apiVersion: v1
 kind: Service
