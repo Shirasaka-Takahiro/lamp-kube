@@ -31,6 +31,13 @@ spec:
         env:
           - name: MYSQL_ROOT_PASSWORD
             value: root
+        volumeMounts:
+        - name: claim-volume
+          mountPath: /volume
+      volumes:
+      - name: claim-volume
+        persistentVolumeClaim:
+          claimName: pv-hostpath-claim
 ---
 apiVersion: v1
 kind: Service
@@ -43,7 +50,36 @@ spec:
   ports:
   - port: 8080
     targetPort: 80
-    nodePort: 30080
+    nodePort: 30000
     protocol: TCP
   selector:
     app: web
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: apache-storage
+  hostPath:
+    path: /private/var/lib/kubernetes/pv00
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-hostpath-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: apache-storage
